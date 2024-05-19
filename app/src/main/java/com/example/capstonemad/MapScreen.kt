@@ -3,6 +3,7 @@ package com.example.capstonemad
 import androidx.compose.runtime.Composable
 import android.content.Context
 import android.location.Location
+import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,15 +52,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingActionButtonElevation
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.painter.Painter
 import com.google.android.gms.maps.model.MarkerOptions
+import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     state: MapState,
     ) {
-
     var maptype by remember{ mutableStateOf(MapType.NORMAL) }
     var mapProperties =
         MapProperties(
@@ -114,61 +117,10 @@ fun MapScreen(
                 {
                     Text(text = "_________________________________________")
                     Row {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
-                            .padding(0.dp, 10.dp, 20.dp, 0.dp)){
-
-                            FloatingActionButton(onClick = { maptype = MapType.NORMAL },
-                                modifier = Modifier
-                                    .size(65.dp, 65.dp),
-                                containerColor = Color.Transparent){
-                                Image(painterResource(id = R.drawable.normal), contentDescription = "normal mapstyle")
-                            }
-                            Text(text = stringResource(id = R.string.Normal))
-                        }
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
-                            .padding(0.dp, 10.dp, 20.dp, 0.dp)) {
-                            FloatingActionButton(
-                                onClick = { maptype = MapType.HYBRID },
-                                modifier = Modifier
-                                    .size(65.dp, 65.dp),
-                                containerColor = Color.Transparent
-                            ) {
-                                Image(
-                                    painterResource(id = R.drawable.hybrid),
-                                    contentDescription = "normal mapstyle"
-                                )
-                            }
-                            Text(text = stringResource(id = R.string.Hybrid))
-                        }
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
-                            .padding(0.dp, 10.dp, 20.dp, 0.dp)){
-                            FloatingActionButton(onClick = { maptype = MapType.SATELLITE },
-                            modifier = Modifier
-                                .size(65.dp, 65.dp),
-                            containerColor = Color.Transparent
-                            ){
-                            Image(painterResource(id = R.drawable.satellite), contentDescription = "normal mapstyle" )
-                        }
-                            Text(text = stringResource(id = R.string.Satellite))
-                        }
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
-                            .padding(0.dp, 10.dp, 20.dp, 0.dp)) {
-                            FloatingActionButton(
-                                onClick = { maptype = MapType.TERRAIN },
-                                modifier = Modifier
-                                    .size(65.dp, 65.dp),
-                                containerColor = Color.Transparent
-                            ) {
-                                Image(
-                                    painterResource(id = R.drawable.terrain),
-                                    contentDescription = "normal mapstyle"
-                                )
-                            }
-                            Text(text = stringResource(id = R.string.Terrain))
-                        }
+                            ShowButton(MapType.NORMAL, onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.normal),"Normal", "Normal")
+                            ShowButton(MapType.HYBRID,  onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.hybrid),"Hybrid", "Hybrid")
+                            ShowButton(MapType.SATELLITE,  onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.satellite),"Satellite", "Satellite")
+                            ShowButton(MapType.TERRAIN,  onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.terrain),"Terrain", "Terrain")
                     }
                     Text(text = "_________________________________________")
 
@@ -177,5 +129,21 @@ fun MapScreen(
                 }
             }
         }
+    }
+}
+@Composable
+fun ShowButton(mapstyle : MapType, onMapTypeChange : (MapType) -> Unit ,image : Painter, description : String, Undertext: String){
+    Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
+        .padding(0.dp, 10.dp, 20.dp, 0.dp)) {
+
+        FloatingActionButton(
+            onClick = { onMapTypeChange(mapstyle)},
+            modifier = Modifier
+                .size(65.dp, 65.dp),
+            containerColor = Color.Transparent
+        ) {
+            Image(image, description)
+        }
+        Text(Undertext.toString())
     }
 }
