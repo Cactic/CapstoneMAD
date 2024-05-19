@@ -2,15 +2,9 @@ package com.example.capstonemad
 
 import android.annotation.SuppressLint
 import com.google.android.gms.location.FusedLocationProviderClient
-import android.content.Context
-import android.graphics.Color
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.ktx.model.polygonOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

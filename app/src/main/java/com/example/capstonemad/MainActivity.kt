@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import android.Manifest
+import com.example.capstonemad.ui.theme.SearchBar
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.FusedLocationProviderClient
 
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
             MapScreen(
                 state = viewModel.state.value,
             )
+            SearchBar()
         }
     }
 }

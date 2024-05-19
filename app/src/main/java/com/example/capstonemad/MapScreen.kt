@@ -1,62 +1,39 @@
 package com.example.capstonemad
 
 import androidx.compose.runtime.Composable
-import android.content.Context
-import android.location.Location
-import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.capstonemad.MapState
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingActionButtonElevation
-import androidx.compose.runtime.saveable.mapSaver
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import org.w3c.dom.Text
+import com.google.maps.android.ktx.model.markerOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +47,9 @@ fun MapScreen(
             mapType = maptype
         )
 
+    var markerState = rememberMarkerState(position = LatLng(0.0, 0.0))
+    var isMarkerVisible by remember { mutableStateOf(false) }
+
     val cameraPositionState = rememberCameraPositionState()
     Box(modifier = Modifier.fillMaxSize())
     {
@@ -77,8 +57,19 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
             properties = mapProperties,
             cameraPositionState = cameraPositionState,
-        ){
+            onMapClick = { latLng ->
+                markerState.position = latLng
+                isMarkerVisible = true
+            }
+        ) {
+            if (isMarkerVisible) {
+                Marker(
+                    state = markerState,
+                    title = "Marker",
+                )
+            }
         }
+
     }
     val sheetState = rememberModalBottomSheetState()
     var isSheetOpen by rememberSaveable {

@@ -4,4 +4,6 @@
     <string name="Hybrid">Hybrid</string>
     <string name="Satellite">Satellite</string>
     <string name="Terrain">Terrain</string>
+
+    <string name="searchText">Search</string>
 </resources>
