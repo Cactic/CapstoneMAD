@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -21,6 +23,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        val apiKey: String = project.rootProject.file("local.properties").inputStream().use { input ->
+            Properties().apply { load(input) }.getProperty("MAPS_API_KEY")
+        }
+        buildConfigField("String", "MAPS_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {
@@ -41,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -74,10 +81,10 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
-
     //Google maps
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
     implementation ("com.google.android.gms:play-services-location:21.2.0")
+    implementation ("com.google.maps.android:android-maps-utils:3.7.0")
 
     //Google maps for compose
     implementation ("com.google.maps.android:maps-compose:4.4.1")
@@ -94,4 +101,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.44")
     kapt ("com.google.dagger:hilt-compiler:2.44")
 
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
 }

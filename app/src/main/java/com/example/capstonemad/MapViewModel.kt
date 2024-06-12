@@ -20,10 +20,6 @@ class MapViewModel @Inject constructor(): ViewModel() {
     fun getDeviceLocation(
         fusedLocationProviderClient: FusedLocationProviderClient
     ) {
-                /*
-                 * Get the best and most recent location of the device, which may be null in rare
-                 * cases when a location is not available.
-                 */
         try {
             val locationResult = fusedLocationProviderClient.lastLocation
             locationResult.addOnCompleteListener { task ->
