@@ -10,7 +10,7 @@ import java.util.Locale
 
 // Function to geocode a location name to LatLng using Geocoder and GeocodeListener
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-fun geocodeLocation( context: Context, locationName: String, callback: (LatLng?) -> Unit) {
+fun geocodeLocation(context: Context, locationName: String, callback: (LatLng?) -> Unit) {
     // Make a geocoder instance and ensures that the geocoding results are localized for the device's default locale
     val geocoder = Geocoder(context, Locale.getDefault())
 
@@ -32,4 +32,45 @@ fun geocodeLocation( context: Context, locationName: String, callback: (LatLng?)
             callback(null)
         }
     })
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+fun geocodeLocation(context: Context, locationLatLng: LatLng, callback: (String) -> Unit) {
+    // Make a geocoder instance and ensures that the geocoding results are localized for the device's default locale
+    val geocoder = Geocoder(context, Locale.getDefault())
+
+    val no_of_adresses = 1
+
+    val noAddressResponse = locationLatLng.displayString()
+
+    // Use GeocodeListener to handle the results asynchronously
+    geocoder.getFromLocation(
+        locationLatLng.latitude,
+        locationLatLng.longitude,
+        no_of_adresses,
+        object : Geocoder.GeocodeListener {
+            override fun onGeocode(addresses: MutableList<Address>) {
+                if (addresses.isNotEmpty()) {
+                    val fetchedAddress = addresses[0]
+                    val strAddress = StringBuilder()
+
+                    for (i in 0 until fetchedAddress.maxAddressLineIndex) {
+                        strAddress.append(fetchedAddress.getAddressLine(i)).append("\n")
+                    }
+
+                    val address = strAddress.toString()
+                    if (address.isNotEmpty()) {
+                        callback(address)
+                    } else {
+                        callback(noAddressResponse)
+                    }
+                } else {
+                    callback(noAddressResponse)
+                }
+            }
+
+            override fun onError(errorMessage: String?) {
+                callback(noAddressResponse)
+            }
+        })
 }

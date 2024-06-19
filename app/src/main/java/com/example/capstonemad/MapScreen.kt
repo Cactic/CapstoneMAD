@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
@@ -50,14 +51,14 @@ import com.google.maps.android.compose.rememberMarkerState
 @Composable
 fun MapScreen(
     state: MapState,
-    searchedLocation : LatLng?,
-    latLngList : MutableList<LatLng>,
-    startLocation : MutableState<LatLng?>,
-    destination : MutableState<LatLng?>,
-    onMapClick : (LatLng) -> Unit,
-    ) {
+    searchedLocation: LatLng?,
+    latLngList: MutableList<LatLng>,
+    startLocation: LatLng?,
+    destination: LatLng?,
+    onMapClick: (LatLng) -> Unit,
+) {
 
-    var maptype by remember{ mutableStateOf(MapType.NORMAL) }
+    var maptype by remember { mutableStateOf(MapType.NORMAL) }
     val mapProperties =
         MapProperties(
             isMyLocationEnabled = state.lastKnownLocation != null,
@@ -68,6 +69,11 @@ fun MapScreen(
 
     val cameraPositionState = rememberCameraPositionState()
     val zoominAmount = 12f
+
+    val sheetState = rememberModalBottomSheetState()
+    var isSheetOpen by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     // Effect to make the camera zoom to the new location and place a marker
     LaunchedEffect(searchedLocation) {
@@ -84,31 +90,26 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
             properties = mapProperties,
             cameraPositionState = cameraPositionState,
-            onMapClick = {
-                destination.value = it
-                onMapClick(it)
-            }
+            onMapClick = onMapClick
+
         ) {
 
-            if (destination.value != null) {
-                Marker(state = MarkerState(position = destination.value!!))
+            if (destination != null) {
+                Marker(state = MarkerState(position = destination))
             }
 
-            if(latLngList.size != 0){
+            if (latLngList.size != 0) {
                 Polyline(points = latLngList.toList())
+            } else if (startLocation != null && destination != null) {
+                Polyline(
+                    points = listOf(
+                        startLocation,
+                        destination
+                    )
+                )
             }
+        }
 
-            else if(startLocation.value != null && destination.value != null){
-                Polyline(points = listOf(
-                    startLocation.value!!,
-                    destination.value!!))
-            }
-      }
-
-    }
-    val sheetState = rememberModalBottomSheetState()
-    var isSheetOpen by rememberSaveable {
-        mutableStateOf(false)
     }
 
     Box(
@@ -138,38 +139,66 @@ fun MapScreen(
                 sheetState = sheetState,
                 onDismissRequest = { isSheetOpen = false },
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth())
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 {
                     Text(text = "_________________________________________")
                     Row {
-                            ShowButton(MapType.NORMAL, onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.normal),"Normal", "Normal")
-                            ShowButton(MapType.HYBRID,  onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.hybrid),"Hybrid", "Hybrid")
-                            ShowButton(MapType.SATELLITE, onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.satellite),"Satellite", "Satellite")
-                            ShowButton(MapType.TERRAIN,  onMapTypeChange = {mapStyle -> maptype = mapStyle}, painterResource(id = R.drawable.terrain),"Terrain", "Terrain")
+                        MapStyleButton(
+                            MapType.NORMAL,
+                            onMapTypeChange = { mapStyle -> maptype = mapStyle },
+                            painterResource(id = R.drawable.normal),
+                        )
+                        MapStyleButton(
+                            MapType.HYBRID,
+                            onMapTypeChange = { mapStyle -> maptype = mapStyle },
+                            painterResource(id = R.drawable.hybrid),
+                        )
+                        MapStyleButton(
+                            MapType.SATELLITE,
+                            onMapTypeChange = { mapStyle -> maptype = mapStyle },
+                            painterResource(id = R.drawable.satellite),
+                        )
+                        MapStyleButton(
+                            MapType.TERRAIN,
+                            onMapTypeChange = { mapStyle -> maptype = mapStyle },
+                            painterResource(id = R.drawable.terrain),
+                        )
                     }
                     Text(text = "_________________________________________")
 
-                    Spacer(modifier = Modifier
-                        .size(40.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .size(40.dp)
+                    )
                 }
             }
         }
     }
 }
+
 @Composable
-fun ShowButton(mapstyle : MapType, onMapTypeChange : (MapType) -> Unit ,image : Painter, description : String, undertext: String){
-    Column(horizontalAlignment = Alignment.CenterHorizontally ,modifier = Modifier
-        .padding(0.dp, 10.dp, 20.dp, 0.dp)) {
+fun MapStyleButton(
+    mapstyle: MapType,
+    onMapTypeChange: (MapType) -> Unit,
+    image: Painter,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+            .padding(0.dp, 10.dp, 20.dp, 0.dp)
+    ) {
+        val mapStyleText = mapstyle.toString().lowercase()
 
         FloatingActionButton(
-            onClick = { onMapTypeChange(mapstyle)},
+            onClick = { onMapTypeChange(mapstyle) },
             modifier = Modifier
                 .size(65.dp, 65.dp),
             containerColor = Color.Transparent
         ) {
-            Image(image, description)
+            Image(image, mapStyleText)
         }
-        Text(undertext)
+        Text(mapStyleText)
     }
 }

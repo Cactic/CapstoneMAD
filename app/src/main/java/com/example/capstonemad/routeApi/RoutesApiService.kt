@@ -1,4 +1,4 @@
-package com.example.capstonemad.RouteApi
+package com.example.capstonemad.routeApi
 
 import retrofit2.Call
 import retrofit2.http.GET
@@ -10,7 +10,20 @@ interface RoutesApiService {
         @Query("origin") origin: String,
         @Query("destination") destination: String,
         @Query("key") apiKey: String,
-        @Query("mode") mode : String,
+        @Query("mode") mode : TravelMode,
         @Query("departureTime") departureTime : String
     ): Call<DirectionsResponse>
+}
+
+enum class TravelMode {
+    Drive("drive"),
+    Bike("bike"),
+    Walk("walk");
+
+    var travelName : String = ""
+
+    constructor()
+    constructor(travelName : String){
+        this.travelName = travelName
+    }
 }

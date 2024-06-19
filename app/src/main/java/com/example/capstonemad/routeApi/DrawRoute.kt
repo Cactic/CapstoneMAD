@@ -1,32 +1,34 @@
-package com.example.capstonemad.RouteApi
+package com.example.capstonemad.routeApi
 
 import android.util.Log
 import com.example.capstonemad.BuildConfig
+import com.example.capstonemad.displayString
+import com.example.capstonemad.tryDisplayString
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
-import com.google.maps.android.ktx.model.polygonOptions
-import com.google.maps.android.ktx.model.polylineOptions
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
+
 fun drawRoute(
-    startLocation : LatLng?,
+    startLocation: LatLng?,
     destination: LatLng?,
+    travelMode: TravelMode,
     onRouteDrawn: (List<LatLng>) -> Unit
 ) {
     if (destination == null || startLocation == null) {
         return
     }
 
-    val mode = "bike"
     val departureTime = "now"
     val apiKey = BuildConfig.MAPS_API_KEY
 
-    val startString = "${startLocation.latitude},${startLocation.longitude}"
-    val destinationString = "${destination.latitude},${destination.longitude}"
+    val startString = startLocation.tryDisplayString()
+    val destinationString = destination.tryDisplayString()
 
     val service = ApiClient.getClient().create(RoutesApiService::class.java)
-    val call = service.getDirections(startString, destinationString,apiKey, mode, departureTime)
+    val call =
+        service.getDirections(startString, destinationString, apiKey, travelMode, departureTime)
 
     call.enqueue(object : Callback<DirectionsResponse> {
         override fun onResponse(

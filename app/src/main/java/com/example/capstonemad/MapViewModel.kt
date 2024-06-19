@@ -10,13 +10,14 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class MapViewModel @Inject constructor(): ViewModel() {
-    val state: MutableState<MapState> = mutableStateOf(MapState(
-        lastKnownLocation = null
-    ))
+class MapViewModel @Inject constructor() : ViewModel() {
+    val state: MutableState<MapState> = mutableStateOf(
+        MapState(
+            lastKnownLocation = null
+        )
+    )
 
-
-        @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     fun getDeviceLocation(
         fusedLocationProviderClient: FusedLocationProviderClient
     ) {

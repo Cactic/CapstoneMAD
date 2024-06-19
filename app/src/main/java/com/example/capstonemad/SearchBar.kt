@@ -1,9 +1,5 @@
 package com.example.capstonemad
 
-import android.location.Geocoder
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,19 +23,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.mutableStateListOf
-import com.example.capstonemad.RouteApi.drawRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(onSearch: (String) -> Unit){
-
+fun SearchBar(onSearch: (String) -> Unit) {
 
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var items = remember {
         mutableStateListOf(
             "Den Haag",
-            "Leiden")
+            "Leiden"
+        )
     }
 
     SearchBar(
@@ -49,16 +44,15 @@ fun SearchBar(onSearch: (String) -> Unit){
             text = it
         },
         onSearch = {
-            if(text != "" && !items.contains(text)){
+            if (text != "" && !items.contains(text)) {
                 items.add(text)
             }
             active = false
             onSearch(text)
         },
-        active = active
-        ,
+        active = active,
         onActiveChange = {
-            active  = it
+            active = it
         },
         leadingIcon = {
             Icon(
@@ -69,17 +63,17 @@ fun SearchBar(onSearch: (String) -> Unit){
                     .size(24.dp)
             )
         },
-        placeholder ={
+        placeholder = {
             Text(text = "Search")
         },
         trailingIcon = {
-            if(active){
+            if (active) {
                 Icon(
 
                     modifier = Modifier.clickable {
-                        if(text.isNotEmpty()){
+                        if (text.isNotEmpty()) {
                             text = ""
-                        }else {
+                        } else {
                             active = false
                         }
                     },
@@ -89,25 +83,28 @@ fun SearchBar(onSearch: (String) -> Unit){
             }
         }
     ) {
-        items.forEach(){
-            Row(modifier = Modifier.padding(all = 14.dp)){
+        items.forEach() {
+            Row(modifier = Modifier.padding(all = 14.dp)) {
                 Box(modifier = Modifier
                     .clickable {
                         text = it
                         active = false
                         onSearch(text)
                     }
-                    .fillMaxWidth()){
+                    .fillMaxWidth()) {
                     Icon(
                         modifier = Modifier
                             .padding(end = 10.dp)
                             .align(Alignment.CenterStart),
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = "History icon")
-                    Text(modifier = Modifier
-                        .padding(start = 35.dp)
-                        .align(Alignment.CenterStart),
-                        text = it)
+                        contentDescription = "History icon"
+                    )
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 35.dp)
+                            .align(Alignment.CenterStart),
+                        text = it
+                    )
                 }
             }
         }
