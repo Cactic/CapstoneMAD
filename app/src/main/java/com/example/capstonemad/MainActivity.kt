@@ -22,16 +22,16 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import com.example.capstonemad.routeApi.TravelMode
 import com.example.capstonemad.routeApi.drawRoute
 import kotlinx.coroutines.launch
 
-
 class MainActivity : ComponentActivity() {
 
-    private val requestPermisisonLauncher =
+    private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -55,12 +55,12 @@ class MainActivity : ComponentActivity() {
         }
 
         else -> {
-            requestPermisisonLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    val viewModel: MapViewModel by viewModels()
+    private val viewModel: MapViewModel by viewModels()
 
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
 
         askPermission()
         setContent {
-            var searchedLocation by remember { mutableStateOf<LatLng?>(null) }
             val latLngList = remember { mutableStateListOf<LatLng>() }
             var startLocation by remember { mutableStateOf<SearchLocation?>(null) }
             var destination by remember { mutableStateOf<SearchLocation?>(null) }
@@ -83,67 +82,68 @@ class MainActivity : ComponentActivity() {
 
             var showRouteSheet by remember { mutableStateOf(false) }
 
-            fun UpdateRoute(locationName: String) {
-                geocodeLocation(this, locationName) { destinationLatLng ->
-                    fun drawMyRoute() {
-                        drawRoute(
-                            startLocation = startLocation?.location,
-                            destination = destination?.location,
-                            travelMode = TravelMode.Drive
-                        ) {
-                            latLngList.clear()
-                            latLngList.addAll(it)
-                        }
-                        scope.launch {
-                            showSearchBar = false
-                            showRouteSheet = true
-                            bottomSheet.bottomSheetState.expand()
+            var travelMode by remember { mutableStateOf(TravelMode.Walk) }
 
-                        }
-                    }
-                    searchedLocation = destinationLatLng
-                    if (destinationLatLng != null) {
-                        destination = SearchLocation(
-                            LatLng(
-                                destinationLatLng.latitude,
-                                destinationLatLng.longitude
-                            ), locationName
-                        )
-                        val lastLocation = viewModel.state.value.lastKnownLocation
-                        if (lastLocation != null && startLocation == null) {
-                            val locationLatLng =
-                                LatLng(lastLocation.latitude, lastLocation.longitude)
-                            geocodeLocation(this, locationLatLng) {
-                                startLocation = SearchLocation(locationLatLng, it)
-                                drawMyRoute()
-                            }
-                        }
-                    } else {
-                        drawMyRoute()
-                    }
+            fun openRouteSheet() {
+                drawRoute(
+                    startLocation = startLocation?.location,
+                    destination = destination?.location,
+                    travelMode = travelMode
+                ) { points ->
+                    latLngList.clear()
+                    latLngList.addAll(points)
+                }
+                scope.launch {
+                    showSearchBar = false
+                    showRouteSheet = true
+                    bottomSheet.bottomSheetState.expand()
+                }
+            }
+
+            fun updateRoute(latLng: LatLng, locationName: String) {
+                showSearchBar = false
+                showRouteSheet = false
+
+                destination = SearchLocation(latLng, locationName)
+                val lastLocation = viewModel.state.value.lastKnownLocation
+                if (lastLocation == null || startLocation != null) {
+                    openRouteSheet()
+                    return
+                }
+
+                val locationLatLng = LatLng(lastLocation.latitude, lastLocation.longitude)
+
+                geocodeLocation(this, locationLatLng) {
+                    startLocation = SearchLocation(locationLatLng, it)
+                    openRouteSheet()
+                }
+            }
+
+            fun updateRoute(latLng: LatLng) {
+                geocodeLocation(this, latLng) {
+                    updateRoute(latLng, it)
                 }
             }
 
             MapScreen(
                 state = viewModel.state.value,
-                searchedLocation = searchedLocation,
                 latLngList = latLngList,
                 startLocation = startLocation?.location,
                 destination = destination?.location,
-                onMapClick = {
-                    //startLocation = viewModel.state.value.lastKnownLocation
-                    destination = SearchLocation(it, it.displayString())
-                    scope.launch {
-                        showRouteSheet = true
-                        showSearchBar = false
-                        bottomSheet.bottomSheetState.expand()
-                    }
-                }
+                onMapClick = { updateRoute(it) }
             )
 
-            if (showSearchBar) {
-                SearchBar(onSearch = {UpdateRoute(it)})
+            fun updateRoute(locationName: String) {
+                geocodeLocation(this, locationName) {
+                    if (it == null) return@geocodeLocation
+                    updateRoute(it, locationName)
+                }
             }
+
+            if (showSearchBar) {
+                SearchBar(onSearch = { updateRoute(it) })
+            }
+
             LaunchedEffect(bottomSheet.bottomSheetState) {
                 snapshotFlow { bottomSheet.bottomSheetState.currentValue }.collect { currentValue ->
                     if (currentValue == SheetValue.PartiallyExpanded) {
@@ -152,14 +152,27 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
             RouteModalSheet(
                 bottomSheetState = bottomSheet,
                 showRouteSheet = showRouteSheet,
                 startLocation = startLocation?.name,
                 destination = destination?.name,
-                travelmode = TravelMode.Drive
+                travelMode = travelMode,
+                onPlanRoute = { start, end, travelingMode ->
+                    travelMode = travelingMode
+                    if (start.isEmpty()) {
+                        updateRoute(end)
+                        showRouteSheet = false
+                        return@RouteModalSheet
+                    }
+                    geocodeLocation(this, start) {
+                        startLocation = SearchLocation(it!!, start)
+                        updateRoute(end)
+                        showRouteSheet = false
+                    }
+                }
             )
         }
     }
-
 }

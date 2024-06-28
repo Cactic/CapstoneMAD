@@ -1,24 +1,14 @@
 package com.example.capstonemad
 
-import android.util.Log
-import android.widget.Space
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -26,33 +16,22 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.capstonemad.routeApi.TravelMode
+import com.google.android.gms.maps.model.LatLng
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,11 +40,14 @@ fun RouteModalSheet(
     showRouteSheet: Boolean,
     startLocation: String?,
     destination: String?,
-    travelmode: TravelMode
+    travelMode: TravelMode,
+    onPlanRoute: (String, String, TravelMode) -> Unit
 ) {
 
     var chooseRouteSheet by remember { mutableStateOf(false) }
-    var selectedMode by remember { mutableStateOf(travelmode) }
+    var selectedMode by remember { mutableStateOf(travelMode) }
+    var startLocationInput: String = startLocation ?: ""
+    var destinationInput: String = destination ?: ""
 
     if (!showRouteSheet) {
         chooseRouteSheet = false
@@ -119,7 +101,10 @@ fun RouteModalSheet(
                             modifier = Modifier,
                             shape = RoundedCornerShape(24.dp),
                             containerColor = Color(173, 207, 240),
-                            onClick = { chooseRouteSheet = true }) {
+                            onClick = {
+                                chooseRouteSheet = true
+                                onPlanRoute(startLocationInput, destinationInput, selectedMode)
+                            }) {
                             Row(
                                 modifier = Modifier
                                     .padding(12.dp),
@@ -150,9 +135,12 @@ fun RouteModalSheet(
                 ) {
                     Spacer(modifier = Modifier.size(10.dp))
 
-                    LocationField(startLocation ?: "", "Start location")
+                    LocationField(
+                        startLocation ?: "",
+                        "Start location",
+                        { startLocationInput = it })
                     Spacer(modifier = Modifier.size(10.dp))
-                    LocationField(destination ?: "", "destination")
+                    LocationField(destination ?: "", "destination", { destinationInput = it })
                 }
             }
         }
@@ -160,12 +148,15 @@ fun RouteModalSheet(
 }
 
 @Composable
-fun LocationField(inputValue: String, labelText: String) {
+fun LocationField(inputValue: String, labelText: String, onValueChange: (String) -> Unit) {
     var locationInput by remember { mutableStateOf(inputValue) }
 
     TextField(
         value = locationInput,
-        onValueChange = { locationInput = it },
+        onValueChange = {
+            locationInput = it
+            onValueChange(it)
+        },
         modifier = Modifier
             .size(200.dp, 45.dp)
             .border(1.dp, Color.Black, RoundedCornerShape(25.dp)),
@@ -191,7 +182,7 @@ fun TravelModeButton(travelMode: TravelMode, onClick: () -> Unit, selected: Bool
         onClick = onClick
     ) {
         Row {
-            Text(text = travelMode.name)
+            Text(text = travelMode.travelName)
         }
     }
 }

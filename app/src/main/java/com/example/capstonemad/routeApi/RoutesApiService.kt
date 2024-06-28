@@ -10,15 +10,15 @@ interface RoutesApiService {
         @Query("origin") origin: String,
         @Query("destination") destination: String,
         @Query("key") apiKey: String,
-        @Query("mode") mode : TravelMode,
+        @Query("travelMode") travelMode : String,
         @Query("departureTime") departureTime : String
     ): Call<DirectionsResponse>
 }
 
 enum class TravelMode {
-    Drive("drive"),
-    Bike("bike"),
-    Walk("walk");
+    Drive("DRIVING"),
+    Bike("BICYCLING"),
+    Walk("WALKING");
 
     var travelName : String = ""
 

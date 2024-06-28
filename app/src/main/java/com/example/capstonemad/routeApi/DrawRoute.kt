@@ -28,7 +28,7 @@ fun drawRoute(
 
     val service = ApiClient.getClient().create(RoutesApiService::class.java)
     val call =
-        service.getDirections(startString, destinationString, apiKey, travelMode, departureTime)
+        service.getDirections(startString, destinationString, apiKey, travelMode.travelName, departureTime)
 
     call.enqueue(object : Callback<DirectionsResponse> {
         override fun onResponse(
