@@ -10,7 +10,7 @@ interface RoutesApiService {
         @Query("origin") origin: String,
         @Query("destination") destination: String,
         @Query("key") apiKey: String,
-        @Query("travelMode") travelMode : String,
+        @Query("mode") travelMode : String,
         @Query("departureTime") departureTime : String
     ): Call<DirectionsResponse>
 }

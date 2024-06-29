@@ -9,6 +9,7 @@ import com.google.maps.android.PolyUtil
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
+import java.util.Locale
 
 fun drawRoute(
     startLocation: LatLng?,
@@ -28,7 +29,11 @@ fun drawRoute(
 
     val service = ApiClient.getClient().create(RoutesApiService::class.java)
     val call =
-        service.getDirections(startString, destinationString, apiKey, travelMode.travelName, departureTime)
+        service.getDirections(
+            startString, destinationString, apiKey, travelMode.travelName.lowercase(
+                Locale.ROOT
+            ), departureTime
+        )
 
     call.enqueue(object : Callback<DirectionsResponse> {
         override fun onResponse(

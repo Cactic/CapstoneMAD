@@ -182,7 +182,7 @@ fun TravelModeButton(travelMode: TravelMode, onClick: () -> Unit, selected: Bool
         onClick = onClick
     ) {
         Row {
-            Text(text = travelMode.travelName)
+            Text(text = travelMode.name)
         }
     }
 }
